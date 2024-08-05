@@ -15,6 +15,7 @@ def leastSquaredLoss(instances, labels, weights, t=1):
 # calculated cross entropy loss
 def crossEntropyLoss(instances, labels, weights):
     return (-1*sum( labels * (torch.log(1 / (1 + torch.exp(-1*(torch.inner(instances, weights)+.0001))))) + (1 - labels) *torch.log( 1 - (1 / (1 + torch.exp(-1*(torch.inner(instances, weights) +.0001))))) ))/len(instances)
+
 # calculates softmax loss
 def softmaxLoss(instances, labels, weights):
     return (sum(torch.log( 1 + torch.exp(-labels*((torch.inner(instances, weights)))) )))/len(instances)
@@ -26,7 +27,7 @@ def step(num) :
     else:
         return 0
 
-# This will see if line learned successful classifies all data
+# This will see if line learned successful classifies all data correctly
 def isClassified(instances,labels,weights,loss):
     if (loss == 3) :
         for i in range(len(instances)):
@@ -56,8 +57,8 @@ def numberOfIncorrect(instances,labels,weights,loss):
     return count
 
 
-# gradient decent algoritm will only run a max of 3000 iterations. loss=1 is LSL , loss=2 is CEL, loss=3 is SML
-# returns wieghts, amount of time , # of iterations and # incorrect predictions
+''' gradient decent algoritm will only run a max of 3000 iterations. loss=1 is LSL , loss=2 is CEL, loss=3 is SML
+ returns wieghts, amount of time , # of iterations and # incorrect predictions '''
 def gradentDecent(instances,testInstances,labels,testLabels,loss=1,step_size=0.1):
     startTime = time.perf_counter()
     weights = tensor([1] * len(instances[0]),dtype=torch.float32,requires_grad=True)
@@ -218,27 +219,27 @@ def changeLabelsToNegativeOne(labels):
     for i in range(len(labels)):
         if (labels[i]==0):
             labels[i] = -1
-#not used
-def isLabelsZeroToOne(labels):
-    for i in labels:
-        if i == 0:
-            return True
-    return False
+# not used
+# def isLabelsZeroToOne(labels):
+#     for i in labels:
+#         if i == 0:
+#             return True
+#     return False
 
 #not used
-def wrongPredictions(weights, test_instances, test_labels):
-    total = 0
-    if (isLabelsZeroToOne(test_labels) == False) :
-        for i in range(len(test_instances)):
-            if (test_labels[i] * torch.inner(test_instances[i],weights)) <= 0:
-                total+=1
-    else: 
-        for i in range(len(test_instances)):
-            if step((1 / (1 + torch.exp(-1*(torch.inner(test_instances[i], weights)))))) != test_labels[i]:
-                total+=1
-            elif step((1 / (1 + torch.exp(-1*(torch.inner(test_instances[i], weights)))))) != test_labels[i]:
-                total+=1
-    return total
+# def wrongPredictions(weights, test_instances, test_labels):
+#     total = 0
+#     if (isLabelsZeroToOne(test_labels) == False) :
+#         for i in range(len(test_instances)):
+#             if (test_labels[i] * torch.inner(test_instances[i],weights)) <= 0:
+#                 total+=1
+#     else: 
+#         for i in range(len(test_instances)):
+#             if step((1 / (1 + torch.exp(-1*(torch.inner(test_instances[i], weights)))))) != test_labels[i]:
+#                 total+=1
+#             elif step((1 / (1 + torch.exp(-1*(torch.inner(test_instances[i], weights)))))) != test_labels[i]:
+#                 total+=1
+#     return total
 
 # polts the data with color coding. also shows line learned
 def plotData(instances, labels, weights, name="scatter-simple.png"):
@@ -258,14 +259,14 @@ def plotData(instances, labels, weights, name="scatter-simple.png"):
     plt.savefig(name)
     plt.clf()
 
-#not used
-def addToTotal(results,totalResults,linearProgramResults,LPTotalResults):
-    for algo in results:
-        for i in range(len(algo)):
-            totalResults[i]+= algo[i]
+# not used
+# def addToTotal(results,totalResults,linearProgramResults,LPTotalResults):
+#     for algo in results:
+#         for i in range(len(algo)):
+#             totalResults[i]+= algo[i]
 
-    for i in range(len(linearProgramResults[0])):
-        LPTotalResults[i]+= linearProgramResults[0][i]
+#     for i in range(len(linearProgramResults[0])):
+#         LPTotalResults[i]+= linearProgramResults[0][i]
 
 # run experiment
 instances,labels, test_instances, test_lables = generateData(size=100)
@@ -275,6 +276,7 @@ SMLResults = []
 PBResluts = []
 PResults = []
 linearProgramResults = []
+# run each algorithm and plot the classified data points along with the linear seprabale line learned
 LSLResults.append(gradentDecent(instances,test_instances,labels,test_lables)) 
 plotData(instances,labels,LSLResults[0][0],name="Least_squared_loss.png")
 plotData(test_instances,test_lables,LSLResults[0][0],name="Least_squared_loss_test.png")
@@ -297,12 +299,13 @@ plotData(instances,labels,linearProgramResults[0][0],name="LinearProgram.png")
 plotData(test_instances,test_lables,linearProgramResults[0][0],name="LinearProgram_test.png")
 
 
-
+# create a file to save results
 wfile = open("lab3results.txt", mode='w')
 orderOfAlgoritms = ["Least_squared","Cross_Entropy","Softmax","Basic_Perceptron","Perceptron","Linear_Program"]
 stringToWrite = ""
 count = 0
 
+# run each algorithm 99 times and add results to respective list
 for i in range(99):
     instances,labels, test_instances, test_lables = generateData(size=100)
     LSLResults.append(gradentDecent(instances,test_instances,labels,test_lables)) 
@@ -316,7 +319,7 @@ for i in range(99):
     print(i)
     
 
-
+# write out the results for each algorthm (computes average) to file
 results = [0,0,0]
 for weights, iterations, timeTook, incorrect in LSLResults:
     results[0] += iterations
